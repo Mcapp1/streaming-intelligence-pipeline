@@ -1,20 +1,17 @@
-# Python
 __pycache__/
 *.py[cod]
 *$py.class
 venv/
-.env
 
-# Credentials & Secrets
+.env
 secrets.yaml
+*/secrets.yaml
+k8s-manifests/secrets.yaml
 *.key
 *.pem
 config.json
 credentials.json
 
-# IDE & OS
 .vscode/
 .DS_Store
 *.log
-__pycache__/
-.DS_Store
