@@ -1,0 +1,98 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: streaming-consumer
+  labels:
+    app: streaming-consumer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: streaming-consumer
+  template:
+    metadata:
+      labels:
+        app: streaming-consumer
+    spec:
+      containers:
+      - name: consumer
+        image: streaming-consumer:latest
+        imagePullPolicy: IfNotPresent  # Changed from Never
+        resources:
+          requests:
+            memory: "512Mi"   # Increased memory
+            cpu: "200m"
+          limits:
+            memory: "1Gi"     # Increased memory limits
+            cpu: "500m"
+        env:
+        # Non-sensitive config from ConfigMap
+        - name: KAFKA_BOOTSTRAP_SERVERS
+          valueFrom:
+            configMapKeyRef:
+              name: streaming-intelligence-config
+              key: KAFKA_BOOTSTRAP_SERVERS
+        # Sensitive data from Secret
+        - name: REDDIT_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: streaming-intelligence-secrets
+              key: REDDIT_CLIENT_ID
+        - name: REDDIT_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: streaming-intelligence-secrets
+              key: REDDIT_CLIENT_SECRET
+        - name: REDDIT_USER_AGENT
+          valueFrom:
+            secretKeyRef:
+              name: streaming-intelligence-secrets
+              key: REDDIT_USER_AGENT
+        - name: SNOWFLAKE_USER
+          valueFrom:
+            secretKeyRef:
+              name: streaming-intelligence-secrets
+              key: SNOWFLAKE_USER
+        - name: SNOWFLAKE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: streaming-intelligence-secrets
+              key: SNOWFLAKE_PASSWORD
+        - name: SNOWFLAKE_ACCOUNT
+          valueFrom:
+            secretKeyRef:
+              name: streaming-intelligence-secrets
+              key: SNOWFLAKE_ACCOUNT
+        - name: SNOWFLAKE_WAREHOUSE
+          valueFrom:
+            secretKeyRef:
+              name: streaming-intelligence-secrets
+              key: SNOWFLAKE_WAREHOUSE
+        - name: SNOWFLAKE_DATABASE
+          valueFrom:
+            secretKeyRef:
+              name: streaming-intelligence-secrets
+              key: SNOWFLAKE_DATABASE
+        - name: SNOWFLAKE_SCHEMA
+          valueFrom:
+            secretKeyRef:
+              name: streaming-intelligence-secrets
+              key: SNOWFLAKE_SCHEMA
+        # Health checks
+        livenessProbe:
+          exec:
+            command:
+            - python
+            - -c
+            - "import sys; sys.exit(0)"
+          initialDelaySeconds: 30
+          periodSeconds: 60
+        readinessProbe:
+          exec:
+            command:
+            - python
+            - -c
+            - "import sys; sys.exit(0)"
+          initialDelaySeconds: 10
+          periodSeconds: 30
+      restartPolicy: Always
