@@ -9,13 +9,40 @@ import streamlit as st
 
 # Load environment variables for Snowflake connection
 def get_snowflake_connection():
+    # Get all required environment variables
+    required_vars = {
+        'SNOWFLAKE_USER': os.getenv('SNOWFLAKE_USER'),
+        'SNOWFLAKE_PASSWORD': os.getenv('SNOWFLAKE_PASSWORD'),
+        'SNOWFLAKE_ACCOUNT': os.getenv('SNOWFLAKE_ACCOUNT'),
+        'SNOWFLAKE_WAREHOUSE': os.getenv('SNOWFLAKE_WAREHOUSE'),
+        'SNOWFLAKE_DATABASE': os.getenv('SNOWFLAKE_DATABASE'),
+        'SNOWFLAKE_SCHEMA': os.getenv('SNOWFLAKE_SCHEMA')
+    }
+    
+    # Check for missing variables
+    missing_vars = [var for var, value in required_vars.items() if not value]
+    if missing_vars:
+        st.error(f"Missing required environment variables: {', '.join(missing_vars)}")
+        st.info("""
+        **Setup Instructions:**
+        1. Create a `.env` file with your Snowflake credentials
+        2. Set the following environment variables:
+           - SNOWFLAKE_USER=your_username
+           - SNOWFLAKE_PASSWORD=your_password
+           - SNOWFLAKE_ACCOUNT=your_account
+           - SNOWFLAKE_WAREHOUSE=your_warehouse
+           - SNOWFLAKE_DATABASE=your_database
+           - SNOWFLAKE_SCHEMA=your_schema
+        """)
+        st.stop()
+    
     return snowflake.connector.connect(
-        user=os.getenv('SNOWFLAKE_USER', 'MCAPPARELLI1'),
-        password=os.getenv('SNOWFLAKE_PASSWORD', 'Limabellabean55'),
-        account=os.getenv('SNOWFLAKE_ACCOUNT', 'XKQBOYS-LX35596'),
-        warehouse=os.getenv('SNOWFLAKE_WAREHOUSE', 'COMPUTE_WH'),
-        database=os.getenv('SNOWFLAKE_DATABASE', 'STREAMING_INTELLIGENCE'),
-        schema=os.getenv('SNOWFLAKE_SCHEMA', 'RAW_DATA')
+        user=required_vars['SNOWFLAKE_USER'],
+        password=required_vars['SNOWFLAKE_PASSWORD'],
+        account=required_vars['SNOWFLAKE_ACCOUNT'],
+        warehouse=required_vars['SNOWFLAKE_WAREHOUSE'],
+        database=required_vars['SNOWFLAKE_DATABASE'],
+        schema=required_vars['SNOWFLAKE_SCHEMA']
     )
 
 @st.cache_data
